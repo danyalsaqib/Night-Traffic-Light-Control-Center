@@ -1,0 +1,10 @@
+main.c:81:5:main	112	static
+main.c:168:6:SystemClock_Config	104	static
+main.c:220:13:MX_I2S3_Init	8	static
+main.c:254:13:MX_SPI1_Init	8	static
+main.c:292:13:MX_GPIO_Init	56	static
+main.c:410:6:OverwrideSwitch	24	static
+main.c:444:6:StartTrafficControl1	24	static
+main.c:487:6:StartSensorData	24	static
+main.c:531:6:HAL_TIM_PeriodElapsedCallback	16	static
+main.c:548:6:Error_Handler	4	static,ignoring_inline_asm
