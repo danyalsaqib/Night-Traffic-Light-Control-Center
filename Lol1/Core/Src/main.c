@@ -69,6 +69,7 @@ void StartSensorData(void const * argument);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
+int counter = 0;
 int switcher = 0;
 int global_sensor = 0;
 float r_sensor[10];
@@ -409,7 +410,7 @@ static void MX_GPIO_Init(void)
 /* USER CODE END Header_OverwrideSwitch */
 void OverwrideSwitch(void const * argument)
 {
-  /* init code for USB_HOST */
+	/* init code for USB_HOST */
   MX_USB_HOST_Init();
   /* USER CODE BEGIN 5 */
   /* Infinite loop */
@@ -425,6 +426,7 @@ void OverwrideSwitch(void const * argument)
 		  HAL_GPIO_WritePin(GPIOE, GPIO_PIN_2, GPIO_PIN_SET);
 		  HAL_Delay(5000);
 		  n = 2000;
+		  counter = 0;
 	  	  while(HAL_GPIO_ReadPin(GPIOB, GPIO_PIN_8) == 0)
 
 	  	  osSemaphoreRelease(SensorStateHandle);
@@ -449,30 +451,38 @@ void StartTrafficControl1(void const * argument)
   {
 	  int n = 5000;
 	  osSemaphoreWait(SensorStateHandle, osWaitForever);
-	  if(switcher == 1)
+	  if (global_sensor == 1 && counter == 1)
 	  {
-		  HAL_GPIO_WritePin(GPIOE, GPIO_PIN_6, GPIO_PIN_SET);
-		  HAL_GPIO_WritePin(GPIOE, GPIO_PIN_5, GPIO_PIN_RESET);
-		  HAL_GPIO_WritePin(GPIOE, GPIO_PIN_4, GPIO_PIN_SET);
-		  HAL_GPIO_WritePin(GPIOE, GPIO_PIN_2, GPIO_PIN_RESET);
-		  switcher = 0;
+		  osDelay(n);
+		  counter = 0;
+		  osSemaphoreRelease(SensorStateHandle);
 	  }
 	  else
 	  {
-		  HAL_GPIO_WritePin(GPIOE, GPIO_PIN_6, GPIO_PIN_RESET);
-		  HAL_GPIO_WritePin(GPIOE, GPIO_PIN_5, GPIO_PIN_SET);
-		  HAL_GPIO_WritePin(GPIOE, GPIO_PIN_4, GPIO_PIN_RESET);
-		  HAL_GPIO_WritePin(GPIOE, GPIO_PIN_2, GPIO_PIN_SET);
-		  switcher = 1;
+		  counter = 1;
+		  if(switcher == 1)
+		  {
+			  HAL_GPIO_WritePin(GPIOE, GPIO_PIN_6, GPIO_PIN_SET);
+			  HAL_GPIO_WritePin(GPIOE, GPIO_PIN_5, GPIO_PIN_RESET);
+			  HAL_GPIO_WritePin(GPIOE, GPIO_PIN_4, GPIO_PIN_SET);
+			  HAL_GPIO_WritePin(GPIOE, GPIO_PIN_2, GPIO_PIN_RESET);
+			  switcher = 0;
+		  }
+		  else
+		  {
+			  HAL_GPIO_WritePin(GPIOE, GPIO_PIN_6, GPIO_PIN_RESET);
+			  HAL_GPIO_WritePin(GPIOE, GPIO_PIN_5, GPIO_PIN_SET);
+			  HAL_GPIO_WritePin(GPIOE, GPIO_PIN_4, GPIO_PIN_RESET);
+			  HAL_GPIO_WritePin(GPIOE, GPIO_PIN_2, GPIO_PIN_SET);
+			  switcher = 1;
+		  }
+		  /*
+		  HA1L_GPIO_WritePin(GPIOE, GPIO_PIN_4, GPIO_PIN_RESET);
+		  HAL_GPIO_WritePin(GPIOE, GPIO_PIN_2, GPIO_PIN_RESET);
+		  */
+		  osSemaphoreRelease(SensorStateHandle);
+		  osDelay(n);
 	  }
-	  /*
-	  HA1L_GPIO_WritePin(GPIOE, GPIO_PIN_4, GPIO_PIN_RESET);
-	  HAL_GPIO_WritePin(GPIOE, GPIO_PIN_2, GPIO_PIN_RESET);
-	  */
-	  if(global_sensor == 1)
-		  n = 10000;
-	  osSemaphoreRelease(SensorStateHandle);
-	  osDelay(n);
   }
   /* USER CODE END StartTrafficControl1 */
 }
@@ -504,7 +514,7 @@ void StartSensorData(void const * argument)
 	  sensor_dsp = sensor_dsp + r_sensor[0];
 	  sensor_dsp = sensor_dsp / 10;
 
-	  if (sensor_dsp > 0.8)
+	  if (sensor_dsp > 0.2)
 	  {
 		HAL_GPIO_WritePin(GPIOC, GPIO_PIN_13, GPIO_PIN_SET);
 		global_sensor = 1;
@@ -515,7 +525,7 @@ void StartSensorData(void const * argument)
 		global_sensor = 0;
 	  }
 	  osSemaphoreRelease(SensorStateHandle);
-	  osDelay(10);
+	  osDelay(1);
   }
   /* USER CODE END StartSensorData */
 }
